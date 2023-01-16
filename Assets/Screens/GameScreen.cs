@@ -14,12 +14,6 @@ namespace UI.Screens
         public void SetController(ShootController shootController)
         {
             _shootController = shootController;
-        }
-
-        protected override void OnShow()
-        {
-            base.OnShow();
-
             shootingComponent.Shoot += _shootController.Shoot;
         }
 
@@ -28,10 +22,6 @@ namespace UI.Screens
             base.OnHide();
 
             shootingComponent.Shoot -= _shootController.Shoot;
-        }
-
-        protected override void OnDestroy()
-        {
             _shootController = null;
         }
     }
