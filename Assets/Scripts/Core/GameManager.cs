@@ -16,8 +16,6 @@ public class GameManager : MonoBehaviour
     private int _currentWayPointIndex = 0;
 
     private const float _requiredDistance = 0.1f;
-    private const float _maxRayDistance = 5f;
-
     private const string _gameSceneName = "Game";
 
     private void Start()
@@ -48,7 +46,7 @@ public class GameManager : MonoBehaviour
     private void StartGame()
     {
         ScreenSystem.ScreensManager.HideScreen<StartScreen>();
-        ScreenSystem.ScreensManager.ShowScreen<GameScreen>().SetShootCallback(Shoot);
+        ScreenSystem.ScreensManager.ShowScreen<GameScreen>().SetController(new ShootController(Player, shootingManager));
 
         _currentWayPointIndex = 0;
 
@@ -59,21 +57,6 @@ public class GameManager : MonoBehaviour
     {
         var firstWayPointTransform = _wayPoints.points[0].transform;
         Player = Instantiate(playerPrefab, firstWayPointTransform.position, firstWayPointTransform.rotation);
-    }
-
-    private void Shoot(Vector3 position)
-    {
-        var ray = Player.playerCamera.ScreenPointToRay(position);
-
-        if (Physics.Raycast(ray, out var hit, _maxRayDistance * 2))
-        {
-            shootingManager.SpawnBullet(Player.bulletSpawnPoint.position, hit.point - Player.bulletSpawnPoint.position);
-        }
-        else
-        {
-            var direction = ray.direction * _maxRayDistance + Player.playerCamera.transform.position - Player.bulletSpawnPoint.position;
-            shootingManager.SpawnBullet(Player.bulletSpawnPoint.position, direction);
-        }
     }
 
     private void MoveToNext()
@@ -149,4 +132,11 @@ public class GameManager : MonoBehaviour
 
         MoveToNext();
     }
+}
+
+public interface IGameState
+{
+    void Start();
+
+    void End();
 }

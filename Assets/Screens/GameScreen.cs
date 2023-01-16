@@ -9,30 +9,30 @@ namespace UI.Screens
     {
         public ShootingInputComponent shootingComponent;
 
-        private Action<Vector3> _shootCallback;
+        private ShootController _shootController;
 
-        public void SetShootCallback(Action<Vector3> callback)
+        public void SetController(ShootController shootController)
         {
-            _shootCallback = callback;
+            _shootController = shootController;
         }
 
         protected override void OnShow()
         {
             base.OnShow();
 
-            shootingComponent.Shoot += _shootCallback;
+            shootingComponent.Shoot += _shootController.Shoot;
         }
 
         protected override void OnHide()
         {
             base.OnHide();
 
-            shootingComponent.Shoot -= _shootCallback;
+            shootingComponent.Shoot -= _shootController.Shoot;
         }
 
         protected override void OnDestroy()
         {
-            _shootCallback = null;
+            _shootController = null;
         }
     }
 }
