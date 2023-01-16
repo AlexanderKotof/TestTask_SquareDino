@@ -25,19 +25,18 @@ public class GameManager : MonoBehaviour
 
     private void LoadGameScene()
     {
-        var loading = SceneManager.LoadSceneAsync(_gameSceneName);
-        loading.completed += GameSceneLoaded;
+        var operation = SceneManager.LoadSceneAsync(_gameSceneName);
+        operation.completed += GameSceneLoaded;
 
         ScreenSystem.ScreensManager.ShowScreen<LoadingScreen>();
     }
 
-    private void GameSceneLoaded(AsyncOperation obj)
+    private void GameSceneLoaded(AsyncOperation operation)
     {
-        obj.completed -= GameSceneLoaded;
+        operation.completed -= GameSceneLoaded;
 
         _wayPoints = SceneContext.GetWaypoints();
         InstatiatePlayer();
-
 
         ScreenSystem.ScreensManager.HideScreen<LoadingScreen>();
         ScreenSystem.ScreensManager.ShowScreen<StartScreen>().SetCallback(StartGame);
