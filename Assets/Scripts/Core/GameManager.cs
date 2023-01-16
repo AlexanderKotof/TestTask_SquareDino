@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UI.Screens;
 using UnityEngine;
@@ -7,15 +6,15 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public PlayerComponent playerPrefab;
-
     public ShootingManager shootingManager;
+
     public PlayerComponent Player { get; private set; }
 
+    private PlayerMovementSystem _playerMovementSystem;
     private WayPoints _wayPoints;
 
     private int _currentWayPointIndex = 0;
 
-    private const float _requiredDistance = 0.1f;
     private const string _gameSceneName = "Game";
 
     private void Start()
@@ -39,6 +38,7 @@ public class GameManager : MonoBehaviour
         _wayPoints = SceneContext.GetWaypoints();
         InstatiatePlayer();
 
+
         ScreenSystem.ScreensManager.HideScreen<LoadingScreen>();
         ScreenSystem.ScreensManager.ShowScreen<StartScreen>().SetCallback(StartGame);
     }
@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
     {
         ScreenSystem.ScreensManager.HideScreen<StartScreen>();
         ScreenSystem.ScreensManager.ShowScreen<GameScreen>().SetController(new ShootController(Player, shootingManager));
+
+        _playerMovementSystem = new PlayerMovementSystem(Player, OnWayPointReached);
 
         _currentWayPointIndex = 0;
 
@@ -69,7 +71,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(MoveToWayPoint(_currentWayPointIndex));
+        var point = _wayPoints.points[_currentWayPointIndex];
+        _playerMovementSystem.MoveToWaypoint(point);
     }
 
     private void LevelEnded()
@@ -84,19 +87,6 @@ public class GameManager : MonoBehaviour
     {
         ScreenSystem.ScreensManager.HideScreen<LevelEndScreen>();
         LoadGameScene();
-    }
-
-    private IEnumerator MoveToWayPoint(int index)
-    {
-        var wayPoint = _wayPoints.points[index];
-        Player.MoveToPosition(wayPoint.transform.position);
-
-        while ((Player.transform.position - wayPoint.transform.position).sqrMagnitude > _requiredDistance * _requiredDistance)
-        {
-            yield return null;
-        }
-
-        WayPointReached(wayPoint);
     }
 
     private IEnumerator WaitForEnemiesDie(WayPointComponent wayPoint)
@@ -122,7 +112,7 @@ public class GameManager : MonoBehaviour
         MoveToNext();
     }
 
-    private void WayPointReached(WayPointComponent wayPoint)
+    private void OnWayPointReached(WayPointComponent wayPoint)
     {
         if (wayPoint.wayPointEnemySpawns.Length > 0)
         {
@@ -132,11 +122,4 @@ public class GameManager : MonoBehaviour
 
         MoveToNext();
     }
-}
-
-public interface IGameState
-{
-    void Start();
-
-    void End();
 }
