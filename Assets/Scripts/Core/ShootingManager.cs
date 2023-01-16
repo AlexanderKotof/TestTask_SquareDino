@@ -1,29 +1,25 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShootingManager : MonoBehaviour
 {
     public BulletComponent bulletPrefab;
 
-    private List<BulletComponent> _bulletPool;
-
     private const float _forceMultiplier = 100;
     private const int _prespawnCount = 5;
 
+    private ObjectPool<BulletComponent> _bulletPool;
+
     private void Start()
     {
-        _bulletPool = new List<BulletComponent>(_prespawnCount);
-
-        for (int i = 0; i < _prespawnCount; i++)
-        {
-            AddBullet();
-        }
+        _bulletPool = new ObjectPool<BulletComponent>(bulletPrefab, transform, _prespawnCount);
 
         BulletComponent.HitEnemy += OnHitEnemy;
     }
 
     private void OnDestroy()
     {
+        _bulletPool.Dispose();
+
         BulletComponent.HitEnemy -= OnHitEnemy;
     }
 
@@ -38,27 +34,8 @@ public class ShootingManager : MonoBehaviour
         }
     }
 
-    private BulletComponent AddBullet()
-    {
-        var bullet = Instantiate(bulletPrefab, transform);
-        bullet.gameObject.SetActive(false);
-        _bulletPool.Add(bullet);
-        return bullet;
-    }
-
     public void SpawnBullet(Vector3 position, Vector3 direction)
     {
-        foreach(var bullet in _bulletPool)
-        {
-            if (bullet.gameObject.activeSelf)
-                continue;
-
-            bullet.Shoot(position, direction);
-            return;
-        }
-
-        AddBullet().Shoot(position, direction);
+        _bulletPool.Pool().Shoot(position, direction);
     }
-
-    
 }
