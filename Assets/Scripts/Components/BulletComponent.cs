@@ -5,6 +5,8 @@ public class BulletComponent : MonoBehaviour
 {
     public new Rigidbody rigidbody;
 
+    public int damage = 1;
+
     public float speed = 5;
 
     public float lifeTime = 5f;
