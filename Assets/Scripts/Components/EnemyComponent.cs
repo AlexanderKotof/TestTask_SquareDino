@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class EnemyComponent : MonoBehaviour
@@ -19,20 +18,17 @@ public class EnemyComponent : MonoBehaviour
     {
         health = startHealth;
 
-        healthbar.UpdateHealth(startHealth, health);
+        SwitchRagdoll(false);
+    }
 
-        animator.enabled = true;
-        foreach (var rigidbody in ragdollRigidbodies)
-        {
-            rigidbody.isKinematic = true;
-        }
+    public void Initialize(PlayerComponent player)
+    {
+        healthbar.Initialize(player.playerCamera);
+        healthbar.UpdateHealth(startHealth, health);
     }
 
     public void TakeDamage(int dmg)
     {
-        if (health <= 0)
-            return;
-
         health -= dmg;
 
         healthbar.UpdateHealth(startHealth, health);
@@ -40,16 +36,20 @@ public class EnemyComponent : MonoBehaviour
 
     public void TriggerRagdoll(Vector3 force, Vector3 hitPoint)
     {
-        animator.enabled = false;
-
-        foreach (var rigidbody in ragdollRigidbodies)
-        {
-            rigidbody.isKinematic = false;
-        }
+        SwitchRagdoll(true);
 
         var hitRigidbody = ragdollRigidbodies.OrderBy((body) => Vector3.SqrMagnitude(body.position - hitPoint)).First();
 
         hitRigidbody.AddForceAtPosition(force, hitPoint);
     }
 
+    private void SwitchRagdoll(bool enableRagdoll)
+    {
+        animator.enabled = !enableRagdoll;
+
+        foreach (var rigidbody in ragdollRigidbodies)
+        {
+            rigidbody.isKinematic = !enableRagdoll;
+        }
+    }
 }

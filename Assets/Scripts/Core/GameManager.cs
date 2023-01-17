@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (var enemy in wayPoint.wayPointEnemySpawns)
         {
-            enemy.SpawnedEnemy.healthbar.Initialize(Player.playerCamera);
+            enemy.SpawnedEnemy.Initialize(Player);
         }
 
         while (true)
