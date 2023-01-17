@@ -17,7 +17,7 @@ public class ShootController
     {
         var ray = player.playerCamera.ScreenPointToRay(position);
 
-        if (Physics.Raycast(ray, out var hit, _maxRayDistance * 2))
+        if (Physics.Raycast(ray, out var hit))
         {
             manager.SpawnBullet(player.bulletSpawnPoint.position, hit.point - player.bulletSpawnPoint.position);
         }
