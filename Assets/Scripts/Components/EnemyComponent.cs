@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class EnemyComponent : MonoBehaviour
 {
-    public int health = 2;
+    public int startHealth = 2;
+    private int health;
+
     public bool IsDied => health <= 0;
+
+    public HealthbarComponent healthbar;
 
     public Animator animator;
 
@@ -13,6 +17,10 @@ public class EnemyComponent : MonoBehaviour
 
     private void Start()
     {
+        health = startHealth;
+
+        healthbar.UpdateHealth(startHealth, health);
+
         animator.enabled = true;
         foreach (var rigidbody in ragdollRigidbodies)
         {
@@ -26,8 +34,9 @@ public class EnemyComponent : MonoBehaviour
             return;
 
         health -= dmg;
-    }
 
+        healthbar.UpdateHealth(startHealth, health);
+    }
 
     public void TriggerRagdoll(Vector3 force, Vector3 hitPoint)
     {
