@@ -1,22 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class ShootingManager : MonoBehaviour
+public class ShootingSystem : IDisposable
 {
-    public BulletComponent bulletPrefab;
-
     private const float _forceMultiplier = 100;
     private const int _prespawnCount = 5;
 
     private ObjectPool<BulletComponent> _bulletPool;
 
-    private void Start()
+    public ShootingSystem(BulletComponent bulletPrefab, Transform parent)
     {
-        _bulletPool = new ObjectPool<BulletComponent>(bulletPrefab, transform, _prespawnCount);
+        _bulletPool = new ObjectPool<BulletComponent>(bulletPrefab, parent, _prespawnCount);
 
         BulletComponent.HitEnemy += OnHitEnemy;
     }
-
-    private void OnDestroy()
+    public void Dispose()
     {
         _bulletPool.Dispose();
 
@@ -25,7 +23,7 @@ public class ShootingManager : MonoBehaviour
 
     private void OnHitEnemy(EnemyComponent enemy, BulletComponent bullet)
     {
-        enemy.TakeDamage(1);
+        enemy.TakeDamage(bullet.damage);
 
         if (enemy.IsDied)
         {

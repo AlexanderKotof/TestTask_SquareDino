@@ -1,55 +1,43 @@
+using ScreenSystem;
 using System.Collections;
 using UI.Screens;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public PlayerComponent playerPrefab;
-    public ShootingManager shootingManager;
-
+    public BulletComponent bulletPrefab;
     public PlayerComponent Player { get; private set; }
 
+    private ShootingSystem _shootingSystem;
     private PlayerMovementSystem _playerMovementSystem;
     private WayPoints _wayPoints;
 
     private int _currentWayPointIndex = 0;
 
-    private const string _gameSceneName = "Game";
-
     private void Start()
     {
         DontDestroyOnLoad(this);
-        LoadGameScene();
+        GameSceneLoader.LoadGameScene(GameSceneLoaded);
     }
 
-    private void LoadGameScene()
+    private void GameSceneLoaded()
     {
-        var operation = SceneManager.LoadSceneAsync(_gameSceneName);
-        operation.completed += GameSceneLoaded;
-
-        ScreenSystem.ScreensManager.ShowScreen<LoadingScreen>();
-    }
-
-    private void GameSceneLoaded(AsyncOperation operation)
-    {
-        operation.completed -= GameSceneLoaded;
-
         _wayPoints = SceneContext.GetWaypoints();
         InstatiatePlayer();
-
-        ScreenSystem.ScreensManager.HideScreen<LoadingScreen>();
-        ScreenSystem.ScreensManager.ShowScreen<StartScreen>().SetCallback(StartGame);
+        ScreensManager.ShowScreen<StartScreen>().SetCallback(StartGame);
     }
 
     private void StartGame()
     {
-        ScreenSystem.ScreensManager.HideScreen<StartScreen>();
-        ScreenSystem.ScreensManager.ShowScreen<GameScreen>().SetController(new ShootController(Player, shootingManager));
+        ScreensManager.HideScreen<StartScreen>();
 
+        _shootingSystem = new ShootingSystem(bulletPrefab, transform);
         _playerMovementSystem = new PlayerMovementSystem(Player, OnWayPointReached);
 
         _currentWayPointIndex = 0;
+
+        ScreensManager.ShowScreen<GameScreen>().SetController(new ShootController(Player, _shootingSystem));
 
         MoveToNext();
     }
@@ -76,26 +64,32 @@ public class GameManager : MonoBehaviour
 
     private void LevelEnded()
     {
-        StopAllCoroutines();
+        _shootingSystem.Dispose();
+        _playerMovementSystem.Dispose();
 
-        ScreenSystem.ScreensManager.HideScreen<GameScreen>();
-        ScreenSystem.ScreensManager.ShowScreen<LevelEndScreen>().SetCallback(RestartGame);
+        ScreensManager.HideScreen<GameScreen>();
+        ScreensManager.ShowScreen<LevelEndScreen>().SetCallback(RestartGame);
     }
 
     private void RestartGame()
     {
-        ScreenSystem.ScreensManager.HideScreen<LevelEndScreen>();
-        LoadGameScene();
+        ScreensManager.HideScreen<LevelEndScreen>();
+        GameSceneLoader.LoadGameScene(GameSceneLoaded);
     }
 
     private IEnumerator WaitForEnemiesDie(WayPointComponent wayPoint)
     {
+        foreach (var enemy in wayPoint.wayPointEnemySpawns)
+        {
+            enemy.SpawnedEnemy.healthbar.Initialize(Player.playerCamera);
+        }
+
         while (true)
         {
             bool wayPointCleared = true;
-            foreach (var enemies in wayPoint.wayPointEnemySpawns)
+            foreach (var enemy in wayPoint.wayPointEnemySpawns)
             {
-                if (!enemies.SpawnedEnemy.IsDied)
+                if (!enemy.SpawnedEnemy.IsDied)
                 {
                     wayPointCleared = false;
                     break;

@@ -3,11 +3,11 @@
 public class ShootController
 {
     private readonly PlayerComponent player;
-    private readonly ShootingManager manager;
+    private readonly ShootingSystem manager;
 
     private const float _maxRayDistance = 5f;
 
-    public ShootController(PlayerComponent player, ShootingManager manager)
+    public ShootController(PlayerComponent player, ShootingSystem manager)
     {
         this.player = player;
         this.manager = manager;
