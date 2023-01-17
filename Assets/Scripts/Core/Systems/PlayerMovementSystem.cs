@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 
-public class PlayerMovementSystem
+public class PlayerMovementSystem : IDisposable
 {
-    private readonly PlayerComponent _player;
-    private readonly Action<WayPointComponent> _wayPointReached;
+    private PlayerComponent _player;
+    private Action<WayPointComponent> _wayPointReached;
 
     private const float _distanceThreashold = 0.1f;
 
@@ -29,5 +29,11 @@ public class PlayerMovementSystem
         }
 
         _wayPointReached(wayPoint);
+    }
+
+    public void Dispose()
+    {
+        _player = null;
+        _wayPointReached = null;
     }
 }
