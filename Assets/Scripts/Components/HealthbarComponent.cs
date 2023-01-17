@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +5,6 @@ public class HealthbarComponent : MonoBehaviour
 {
     private Camera _mainCamera;
     public Slider healthbar;
-
 
     private void Start()
     {
@@ -26,7 +22,7 @@ public class HealthbarComponent : MonoBehaviour
         healthbar.maxValue = startHealth;
         healthbar.value = health;
 
-        if (health == 0)
+        if (health <= 0)
             gameObject.SetActive(false);
     }
 
